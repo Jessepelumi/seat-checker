@@ -54,6 +54,8 @@ export default function Home() {
             src="/TJ.jpg"
             alt="Tayielolu and Joshua engagement"
             fill
+            priority={true}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
             className="object-cover absolute"
           />
         </div>
