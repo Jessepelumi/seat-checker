@@ -1,31 +1,49 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SeatDetails } from "../components/seatDetails";
 
-export default function Home() {
-  type Guest = {
-    name: string;
-    table: string;
-    seat: string;
-  };
+type Guest = {
+  name: string;
+  table: string;
+  seat: string;
+};
 
+export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
+  const [guests, setGuests] = useState<Guest[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [apiError, setApiError] = useState("");
 
-  const mockGuests = [
-    { name: "Adesina Joshua", table: "4", seat: "4" },
-    { name: "Adesina Jesse", table: "4", seat: "5" },
-    { name: "Mosope Sharon", table: "1", seat: "6" },
-    { name: "Abey Ojomu", table: "2", seat: "9" },
-  ];
+  useEffect(() => {
+    async function fetchGuestList() {
+      try {
+        const response = await fetch("/api/guests");
+        const result = await response.json();
+
+        if (result.status === "success") {
+          setGuests(result.allGuests);
+        } else {
+          setApiError("Unable to load guest list. Please look for an usher.");
+        }
+      } catch (err) {
+        setApiError(`Network error. Please try refreshing.`);
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchGuestList();
+  }, []);
 
   const query = searchQuery.trim().toLowerCase();
 
   const filteredSuggestions =
     query.length >= 1 && !selectedGuest
-      ? mockGuests.filter((guest) => guest.name.toLowerCase().includes(query))
+      ? guests.filter((guest) => guest.name.toLowerCase().includes(query))
       : [];
 
   const handleSelectGuest = (guest: Guest) => {
@@ -34,7 +52,7 @@ export default function Home() {
   };
 
   const handleSearch = () => {
-    const guest = mockGuests.find((g) => g.name.toLowerCase() === query);
+    const guest = guests.find((g) => g.name.toLowerCase() === query);
 
     if (guest) {
       handleSelectGuest(guest);
@@ -54,7 +72,7 @@ export default function Home() {
             src="/TJ.jpg"
             alt="Tayielolu and Joshua engagement"
             fill
-            priority={true}
+            priority
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
             className="object-cover absolute"
           />
@@ -65,7 +83,7 @@ export default function Home() {
 
           <p className="text-xs text-gray-500 leading-relaxed">
             We are happy to have you celebrate this special day with us. We hope
-            you have an amazing time, as much as we know we will have. Plese be
+            you have an amazing time, as much as we know we will have. Please be
             respectful to all of our guests and staff. Once again, welcome to
             the beginning of our forever. Enjoy!
           </p>
@@ -73,7 +91,16 @@ export default function Home() {
       </section>
 
       <section className="w-full md:w-1/2 lg:w-1/4">
-        {!selectedGuest ? (
+        {/* Loading / Error Overlays */}
+        {isLoading ? (
+          <p className="text-xs text-gray-400 italic text-center py-4 animate-pulse">
+            Loading guest list...
+          </p>
+        ) : apiError ? (
+          <p className="text-xs text-red-500 font-medium text-center py-4">
+            {apiError}
+          </p>
+        ) : !selectedGuest ? (
           <div className="space-y-2">
             <h3 className="font-black text-sm">
               Input your name to view your seat
@@ -111,12 +138,12 @@ export default function Home() {
               </div>
 
               {filteredSuggestions.length > 0 && (
-                <ul className="absolute left-0 right-0 mt-2 bg-white border border-gray-300 rounded-xl shadow-lg overflow-hidden z-50">
+                <ul className="absolute left-0 right-0 mt-2 bg-white border border-gray-300 rounded-xl shadow-lg overflow-hidden z-50 max-h-48 overflow-y-auto">
                   {filteredSuggestions.map((guest) => (
                     <li
                       key={guest.name}
                       onClick={() => handleSelectGuest(guest)}
-                      className="px-4 py-3 text-sm cursor-pointer hover:bg-gray-300 border-b border-b-gray-200 last:border-b-0"
+                      className="px-4 py-3 text-sm cursor-pointer hover:bg-gray-100 border-b border-b-gray-200 last:border-b-0"
                     >
                       {guest.name}
                     </li>
