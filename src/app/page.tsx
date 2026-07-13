@@ -118,7 +118,7 @@ export default function Home() {
                       handleSearch();
                     }
                   }}
-                  className="w-full py-3 text-sm outline-none"
+                  className="w-full py-3 text-base outline-none"
                 />
 
                 <button
