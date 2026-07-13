@@ -55,8 +55,7 @@ export default function Home() {
     const guest = guests.find((g) => g.name.toLowerCase() === query);
 
     if (guest) {
-      handleSelectGuest(guest);
-    }
+      handleSelectGuest(guest); }
   };
 
   const handleSearchAgain = () => {
